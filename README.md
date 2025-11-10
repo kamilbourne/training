@@ -5,7 +5,7 @@ Training repository for DevOps and basic coding.
 - DevOps - the specific devops skillset like pipelines, vagrant, terraform.
 	- Vagrant
 	- Docker
-- Coding - small coding projects, python.
+- Coding - small coding projects, assembly, python, C++.
 - Scripts - containing scripting languages like powershell and bash
 	- Powershell
 	- Bash
