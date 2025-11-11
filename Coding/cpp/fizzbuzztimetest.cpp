@@ -3,6 +3,8 @@
 #include <chrono>
 #include <string>
 #include <stdexcept>
+#include <thread>
+#include <atomic>
 using namespace std;
 //list of functionsb
 void fizzbuzz1(unsigned int n);
@@ -21,10 +23,13 @@ const char* nazwa_programu = "FizzBuzzTimeTest";
 bool wstep = false;
 bool tests[4] = {false,true,true,true}; //print,org,assign,clean
 bool zeZmienna = true;
+bool threads = false;
+thread t1, t2, t3, t4, t5, t6, t7, t8; 
+int threadsnum = 0;
 string nazwaTestu[2]  = {"",""};
 string wyjatekPrint = "";
 unsigned long long int N = 100000;
-unsigned long long int global_sink = 0;
+std::atomic<unsigned long long int> global_sink = 0;
 string timefactorstr = "mikrosekund";
 int timefactorint = 0;
 int main(int argc, char* argv[]){
@@ -74,6 +79,10 @@ int main(int argc, char* argv[]){
 				timefactorstr = "sekund";
 				timefactorint = 2;
 			}
+			else if (arg == "--threads" || arg == "-t")
+			{
+				threads = true;
+			}
 			else
 			{
 				try
@@ -110,149 +119,192 @@ int main(int argc, char* argv[]){
 	else 
 	{
 		if(wstep){wyswietl_wstep();}
-		cout << "Test uruchomione dla \tN=" << N << endl; 
+		cout << "Test uruchomione dla \tN=" << N << endl << endl; 
 	}
-	for(int i=0; i <= sizeof(tests)-1; i++)
+	if(!threads)
 	{
-		for (int j=0; j<=1; j++)
+		auto startglobal = std::chrono::high_resolution_clock::now();
+		for(int i=0; i <= sizeof(tests)-1; i++)
 		{
-			if(tests[i])
+			for (int j=0; j<=1; j++)
 			{
-				auto start = std::chrono::high_resolution_clock::now();
-				switch(i)
+
+				if(tests[i])
 				{
-					case 0:
+					auto start = std::chrono::high_resolution_clock::now();
+					switch(i)
 					{
-						if(zeZmienna) 
+						case 0:
 						{
-							fizzbuzz1print(N);
-							zeZmienna = false;
-							nazwaTestu[j] = "FizzBuzz ze zmienna na ekranie:\t\t\t";
-						}
-						else
+							if(zeZmienna) 
+							{								
+								fizzbuzz1print(N);
+								zeZmienna = false;
+								nazwaTestu[j] = "FizzBuzz ze zmienna na ekranie:\t\t\t";
+							}
+							else
+							{
+								fizzbuzz2print(N);
+								zeZmienna = true;
+								nazwaTestu[j] = "FizzBuzz z waurunkami na ekranie:\t\t";
+							}
+							break;
+						} 
+						case 1: 
 						{
-							fizzbuzz2print(N);
-							zeZmienna = true;
-							nazwaTestu[j] = "FizzBuzz z waurunkami na ekranie:\t\t";
+							if(zeZmienna) 
+							{
+								fizzbuzz1(N);
+								zeZmienna = false;
+								nazwaTestu[j] = "FizzBuzz ze zmienna oryginalny:\t\t\t";
+							}
+							else
+							{
+								fizzbuzz2(N);
+								zeZmienna = true;
+								nazwaTestu[j] = "FizzBuzz z waurunkami oryginalny:\t\t";
+							}
+							break;
 						}
-						break;
-					} 
-					case 1: 
-					{
-						if(zeZmienna) 
+						case 2: 
 						{
-							fizzbuzz1(N);
-							zeZmienna = false;
-							nazwaTestu[j] = "FizzBuzz ze zmienna oryginalny:\t\t\t";
+							if(zeZmienna) 
+							{
+								fizzbuzz1assign(N);
+								zeZmienna = false;
+								nazwaTestu[j] = "FizzBuzz ze zmienna przypisywanie:\t\t";
+							}
+							else
+							{
+								fizzbuzz2assign(N);
+								zeZmienna = true;
+								nazwaTestu[j] = "FizzBuzz z waurunkami przypisywanie:\t\t";
+							}
+							break;
 						}
-						else
+						case 3: 
 						{
-							fizzbuzz2(N);
-							zeZmienna = true;
-							nazwaTestu[j] = "FizzBuzz z waurunkami oryginalny:\t\t";
+							if(zeZmienna) 
+							{
+								fizzbuzz1clean(N);
+								zeZmienna = false;
+								nazwaTestu[j] = "FizzBuzz ze zmienna clean:\t\t\t";
+							}
+							else
+							{
+								fizzbuzz2clean(N);
+								zeZmienna = true;
+								nazwaTestu[j] = "FizzBuzz z waurunkami clean:\t\t\t";
+							}
+							break;
 						}
-						break;
 					}
-					case 2: 
+					auto end = chrono::high_resolution_clock::now();
+					auto duration = end - start;
+					auto czasmicro = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+					auto czassec = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+					auto czasmili = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+					switch(timefactorint)
 					{
-						if(zeZmienna) 
+						case 0:
 						{
-							fizzbuzz1assign(N);
-							zeZmienna = false;
-							nazwaTestu[j] = "FizzBuzz ze zmienna przypisywanie:\t\t";
+							if(i!=0)
+							{
+								cout << nazwaTestu[j] << czasmicro << " " << timefactorstr << endl;
+							}
+							else if (i==0 && j==0)
+							{
+								string czas = to_string(czasmicro);
+								wyjatekPrint = nazwaTestu[j].append(czas).append(" ").append(timefactorstr).append("\n");
+							}
+							else
+							{
+								cout << wyjatekPrint;
+								cout << nazwaTestu[j] << czasmicro << " " << timefactorstr << endl;
+							}
+							break;
 						}
-						else
+						case 2:
 						{
-							fizzbuzz2assign(N);
-							zeZmienna = true;
-							nazwaTestu[j] = "FizzBuzz z waurunkami przypisywanie:\t\t";
+							if(i!=0)
+							{
+								cout << nazwaTestu[j] << czassec << " " << timefactorstr << endl;
+							}
+							else if (i==0 && j==0)
+							{
+								string czas = to_string(czassec);
+								wyjatekPrint = nazwaTestu[j].append(czas).append(" ").append(timefactorstr).append("\n");
+							}
+							else
+							{
+								cout << wyjatekPrint;
+								cout << nazwaTestu[j] << czassec << " " << timefactorstr << endl;
+							}
+							break;
 						}
-						break;
-					}
-					case 3: 
-					{
-						if(zeZmienna) 
+						case 1:
 						{
-							fizzbuzz1clean(N);
-							zeZmienna = false;
-							nazwaTestu[j] = "FizzBuzz ze zmienna clean:\t\t\t";
+							if(i!=0)
+							{
+								cout << nazwaTestu[j] << czasmili << " " << timefactorstr << endl;
+							}
+							else if (i==0 && j==0)
+							{
+								string czas = to_string(czasmili);
+								wyjatekPrint = nazwaTestu[j].append(czas).append(" ").append(timefactorstr).append("\n");
+							}
+							else
+							{
+								cout << wyjatekPrint;
+								cout << nazwaTestu[j] << czasmili << " " << timefactorstr << endl;
+							}
+							break;
 						}
-						else
-						{
-							fizzbuzz2clean(N);
-							zeZmienna = true;
-							nazwaTestu[j] = "FizzBuzz z waurunkami clean:\t\t\t";
-						}
-						break;
-					}
-				}
-				auto end = chrono::high_resolution_clock::now();
-				auto duration = end - start;
-				auto czasmicro = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-				auto czassec = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
-				auto czasmili = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-				switch(timefactorint)
-				{
-					case 0:
-					{
-						if(i!=0)
-						{
-							cout << nazwaTestu[j] << czasmicro << " " << timefactorstr << endl;
-						}
-						else if (i==0 && j==0)
-						{
-							string czas = to_string(czasmicro);
-							wyjatekPrint = nazwaTestu[j].append(czas).append(" ").append(timefactorstr).append("\n");
-						}
-						else
-						{
-							cout << wyjatekPrint;
-							cout << nazwaTestu[j] << czasmicro << " " << timefactorstr << endl;
-						}
-						break;
-					}
-					case 2:
-					{
-						if(i!=0)
-						{
-							cout << nazwaTestu[j] << czassec << " " << timefactorstr << endl;
-						}
-						else if (i==0 && j==0)
-						{
-							string czas = to_string(czassec);
-							wyjatekPrint = nazwaTestu[j].append(czas).append(" ").append(timefactorstr).append("\n");
-						}
-						else
-						{
-							cout << wyjatekPrint;
-							cout << nazwaTestu[j] << czassec << " " << timefactorstr << endl;
-						}
-						break;
-					}
-					case 1:
-					{
-						if(i!=0)
-						{
-							cout << nazwaTestu[j] << czasmili << " " << timefactorstr << endl;
-						}
-						else if (i==0 && j==0)
-						{
-							string czas = to_string(czasmili);
-							wyjatekPrint = nazwaTestu[j].append(czas).append(" ").append(timefactorstr).append("\n");
-						}
-						else
-						{
-							cout << wyjatekPrint;
-							cout << nazwaTestu[j] << czasmili << " " << timefactorstr << endl;
-						}
-						break;
 					}
 				}
 			}
-		}
-	}	
-	if(tests[3]){cout << "Suma Kontrolna: \t\t" << global_sink << " ---\n";}
-	return 0;
+		}	
+		if(tests[3]){cout << "\nSuma Kontrolna: \t\t\t\t" << global_sink << "\n";}
+		auto endglobal = chrono::high_resolution_clock::now();
+		auto durationglobal = endglobal - startglobal;
+		auto czasglobalmicro = std::chrono::duration_cast<std::chrono::microseconds>(durationglobal).count();
+		auto czasglobalsec = std::chrono::duration_cast<std::chrono::seconds>(durationglobal).count();
+		auto czasglobalmili = std::chrono::duration_cast<std::chrono::milliseconds>(durationglobal).count();
+		if(timefactorint==0){cout << "Calkowity czas wykonania:\t\t\t" << czasglobalmicro << " " << timefactorstr << endl;}
+		else if(timefactorint==1){cout << "Calkowity czas wykonania:\t\t\t" << czasglobalmili << " " << timefactorstr << endl;}
+		else {cout << "Calkowity czas wykonania:\t\t\t" << czasglobalsec << " " << timefactorstr << endl;}
+		return 0;
+	}
+	else
+	{
+		auto startglobal = std::chrono::high_resolution_clock::now();
+		//thread t1(fizzbuzz1print, N);							
+		//thread t2(fizzbuzz2print, N);
+		thread t3(fizzbuzz1, N);
+		thread t4(fizzbuzz2, N);
+		thread t5(fizzbuzz1assign, N);	
+		thread t6(fizzbuzz2assign, N);				
+		thread t7(fizzbuzz1clean, N);							
+		thread t8(fizzbuzz2clean, N);	
+		//t1.join();		
+		//t2.join();
+		t3.join();
+		t4.join();	
+		t5.join();		
+		t6.join();
+		t7.join();
+		t8.join();						
+		if(tests[3]){cout << "\nSuma Kontrolna: \t\t\t\t" << global_sink << "\n";}
+		auto endglobal = chrono::high_resolution_clock::now();
+		auto durationglobal = endglobal - startglobal;
+		auto czasglobalmicro = std::chrono::duration_cast<std::chrono::microseconds>(durationglobal).count();
+		auto czasglobalsec = std::chrono::duration_cast<std::chrono::seconds>(durationglobal).count();
+		auto czasglobalmili = std::chrono::duration_cast<std::chrono::milliseconds>(durationglobal).count();
+		if(timefactorint==0){cout << "Calkowity czas wykonania:\t\t\t" << czasglobalmicro << " " << timefactorstr << endl;}
+		else if(timefactorint==1){cout << "Calkowity czas wykonania:\t\t\t" << czasglobalmili << " " << timefactorstr << endl;}
+		else {cout << "Calkowity czas wykonania:\t\t\t" << czasglobalsec << " " << timefactorstr << endl;}
+		return 0;	
+	}
 }
 
 void fizzbuzz1(unsigned int n)
