@@ -29,7 +29,7 @@ int threadsnum = 0;
 string nazwaTestu[2]  = {"",""};
 string wyjatekPrint = "";
 unsigned long long int N = 100000;
-std::atomic<unsigned long long int> global_sink = 0;
+//std::atomic<unsigned long long int> global_sink = 0;
 string timefactorstr = "mikrosekund";
 int timefactorint = 0;
 int main(int argc, char* argv[]){
@@ -264,7 +264,7 @@ int main(int argc, char* argv[]){
 				}
 			}
 		}	
-		if(tests[3]){cout << "\nSuma Kontrolna: \t\t\t\t" << global_sink << "\n";}
+		//if(tests[3]){cout << "\nSuma Kontrolna: \t\t\t\t" << global_sink << "\n";}
 		auto endglobal = chrono::high_resolution_clock::now();
 		auto durationglobal = endglobal - startglobal;
 		auto czasglobalmicro = std::chrono::duration_cast<std::chrono::microseconds>(durationglobal).count();
@@ -283,13 +283,13 @@ int main(int argc, char* argv[]){
 		// thread t3(fizzbuzz1, N);
 		// thread t4(fizzbuzz2, N);	
 		// thread t5(fizzbuzz1assign, N);	
-		// thread t6(fizzbuzz2assign, N);		
-		thread t1(fizzbuzz2clean, N);
-		thread t2(fizzbuzz2clean, N);
-		thread t3(fizzbuzz1clean, N);							
-		thread t4(fizzbuzz2clean, N);
-		thread t5(fizzbuzz2clean, N);
-		thread t6(fizzbuzz2clean, N);
+		// thread t6(fizzbuzz2assign, N);
+		thread t1(fizzbuzz1clean, N);
+		thread t2(fizzbuzz1clean, N);
+		thread t3(fizzbuzz1clean, N);
+		thread t4(fizzbuzz1clean, N);
+		thread t5(fizzbuzz1clean, N);
+		thread t6(fizzbuzz1clean, N);		
 		thread t7(fizzbuzz1clean, N);							
 		thread t8(fizzbuzz2clean, N);	
 		t1.join();		
@@ -300,7 +300,7 @@ int main(int argc, char* argv[]){
 		t6.join();
 		t7.join();
 		t8.join();						
-		if(tests[3]){cout << "\nSuma Kontrolna: \t\t\t\t" << global_sink << "\n";}
+		//if(tests[3]){cout << "\nSuma Kontrolna: \t\t\t\t" << global_sink << "\n";}
 		auto endglobal = chrono::high_resolution_clock::now();
 		auto durationglobal = endglobal - startglobal;
 		auto czasglobalmicro = std::chrono::duration_cast<std::chrono::microseconds>(durationglobal).count();
@@ -486,7 +486,7 @@ void fizzbuzz1clean(unsigned long long int n)
 			counter += 1; //Liczba
 		}
 	}
-	global_sink += counter;
+	//global_sink += counter;
 }
 
 void fizzbuzz2clean(unsigned long long int n)
@@ -511,7 +511,7 @@ void fizzbuzz2clean(unsigned long long int n)
 			counter += 1; //liczba
 		}
 	}
-	global_sink += counter;
+	//global_sink += counter;
 }
 void wyswietl_wstep()
 {
